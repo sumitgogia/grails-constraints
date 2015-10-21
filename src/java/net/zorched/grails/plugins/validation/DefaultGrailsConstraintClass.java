@@ -16,11 +16,13 @@ package net.zorched.grails.plugins.validation;
 
 import grails.util.GrailsNameUtils;
 import groovy.lang.Closure;
+
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass;
 import org.hibernate.SessionFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -160,8 +162,20 @@ public class DefaultGrailsConstraintClass extends AbstractInjectableGrailsClass 
         }
 
         if (obj instanceof Closure) {
+            Closure epp = (Closure) obj;
+            int paramsCount = epp.getMaximumNumberOfParameters();
+            ArrayList<Object> eppParams = new ArrayList<Object>();
+            if (paramsCount > 0) {
+                eppParams.add(constraintParameter);
+            }
+            if (paramsCount > 1) {
+                eppParams.add(constraintPropertyName);
+            }
+            if (paramsCount > 2) {
+                eppParams.add(constraintPropertyOwner);
+            }
             // Call a closure and let the instance validate it
-            ((Closure) obj).call(constraintParameter);
+            epp.call(eppParams);
         } else if (obj instanceof Boolean) {
 
             // If it's true, we just need to confirm a single param
